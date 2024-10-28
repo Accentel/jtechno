@@ -1,0 +1,75 @@
+<style type="text/css">
+    table { page-break-inside:auto;page-break-inside:auto;border-color:#fff;font-family: "Times New Roman", Times, serif;font-size:12px;  }
+    tr    { page-break-inside:avoid; page-break-after:auto }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group }
+    thead,tfoot{border:none !important;border-color:#fff;}
+    
+    tr.noBorder th {
+  border:none !important;
+  border-color:#fff;
+}
+#tds{
+    
+border:0;
+}
+table {
+border-left:none !important;
+border-top: none !important;
+border-bottom: none !important;
+border-right:none !important;
+}
+ .pageNumbering
+{
+display:block;
+font-weight: normal;
+font-size: 8pt;
+color: #666666;
+font-style: normal;
+font-family: Arial, Helvetica;
+text-decoration: none;
+text-align: right; 
+}
+.pagenum:before { content: counter(page); }
+footer {
+  font-size: 24px;
+  color: #f00;
+  width:100%;
+   text-align: center;
+}
+header {
+  font-size: 9px;
+  color: #f00;
+  text-align: center;
+}
+
+@page {
+  size: A4;
+  margin: 11mm 9mm 11mm 5mm;
+  
+  @bottom {
+	content: "Page " counter(page) " of " counter(pages)
+    }
+}
+
+@media print {
+  footer {
+    position: fixed;
+    bottom: 0;
+	width:100%;
+  }
+header {
+    position: fixed;
+    top: 0;
+  }
+  .content-block, p {
+    page-break-inside: avoid;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 297mm;
+  }
+}
+.pagenum:before { content: counter(page); }
+</style>

@@ -1,0 +1,211 @@
+<?php
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+
+// include_once('config.php');
+define("HOST_NAME","localhost");
+define("USER","a16673ai_payamath");
+define("PASSWORD","Payamath@2016");
+define("DB","a16673ai_jfm2324");
+$link=mysqli_connect(HOST_NAME,USER,PASSWORD,DB);
+if (mysqli_connect_errno())
+  {
+  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+  }
+
+  $tsname=$_GET['username'];
+  $fromdate=$_GET['from_date'];
+   $todate=$_GET['to_date'];
+ 
+ if(($tsname=='admin') or ($tsname=='durgarao') or ($tsname=='accounts') or ($tsname=='knbilling') or ($tsname=='sumanthpotluri')){
+	 $y="select * from knrequest_amnt where  confirm='Yes' and status='Amount Transferred' and date and date >= '$fromdate' and  date <= '$todate'   order by id desc";    
+ }else{
+	 $y="select * from knrequest_amnt where  confirm='Yes' and status='Amount Transferred'  and user='$tsname' and date >= '$fromdate' and  date <= '$todate'    order by id desc";
+	 }
+	 
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+
+$sheet->mergeCells('A1:AC1');
+$sheet->getStyle("A1:AC1")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('800000');
+$sheet->getStyle("A1:AC1")->getFont()->setBold(true)->getColor()->setRGB('ffffff');
+$sheet->setCellValue('A1', 'JTECHNO ASSOCIATES FACILITY MANAGEMENT PVT.LTD');
+$sheet->getStyle("A1:AC1")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+$sheet->mergeCells('A4:AC4');
+$sheet->getStyle("A4:AC4")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('800000');
+$sheet->getStyle("A4:AC4")->getFont()->setBold(true)->getColor()->setRGB('ffffff');
+$sheet->setCellValue('A4', 'KARNATAKA APPROVED AMOUNT LIST');
+$sheet->getStyle("A4:AC4")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+$sheet->setCellValue('A6', 'SNo');
+$sheet->setCellValue('B6', 'Quotation No');
+$sheet->setCellValue('C6', 'Supervisor');
+$sheet->setCellValue('D6', 'Coordinator');
+$sheet->setCellValue('E6', 'Store Name');
+$sheet->setCellValue('F6', 'Store Code');
+$sheet->setCellValue('G6', 'Store Type');
+$sheet->setCellValue('H6', 'Ro Num');
+$sheet->setCellValue('I6', 'Ro Date');
+$sheet->setCellValue('J6', 'Fault Description');
+$sheet->setCellValue('K6', 'RO Amount');
+$sheet->setCellValue('L6', 'Service Fee');
+$sheet->setCellValue('M6', 'GST');
+$sheet->setCellValue('N6', 'Total');
+$sheet->setCellValue('O6', 'Requested Amount');
+$sheet->setCellValue('P6', 'Balance Amount');
+$sheet->setCellValue('Q6', 'GST Type');
+$sheet->setCellValue('R6', 'GST Amount');
+$sheet->setCellValue('T6', 'Advance Amount');
+$sheet->setCellValue('S6', 'Remarks');
+$sheet->setCellValue('U6', 'Whom to be Invest Amount');
+$sheet->setCellValue('V6', 'Request Amount');
+$sheet->setCellValue('W6', 'Approved Amount Date');
+$sheet->setCellValue('X6', 'User');
+$sheet->setCellValue('Y6', 'Invoice Date');
+$sheet->setCellValue('Z6', 'Invoice No');
+$sheet->setCellValue('AA6', 'Invoice Amount');
+$sheet->setCellValue('AB6', 'Invoice GST Amount');
+$sheet->setCellValue('AC6', 'Invoice Total Amount');
+
+$sheet->getStyle("A6:AC6")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('800000');
+$sheet->getStyle("A6:AC6")->getFont()->setBold(true)->getColor()->setRGB('ffffff');
+$sheet->getColumnDimension('B')->setWidth(22);
+$sheet->getColumnDimension('C')->setWidth(12);
+$sheet->getColumnDimension('D')->setWidth(18);
+$sheet->getColumnDimension('E')->setWidth(28);
+$sheet->getColumnDimension('F')->setWidth(12);
+$sheet->getColumnDimension('G')->setWidth(20);
+$sheet->getColumnDimension('H')->setWidth(20);
+$sheet->getColumnDimension('I')->setWidth(12);
+$sheet->getColumnDimension('J')->setWidth(14);
+$sheet->getColumnDimension('K')->setWidth(13);
+$sheet->getColumnDimension('L')->setWidth(13);
+$sheet->getColumnDimension('M')->setWidth(13);
+$sheet->getColumnDimension('N')->setWidth(15);
+$sheet->getColumnDimension('Q')->setWidth(19);
+$sheet->getColumnDimension('S')->setWidth(22);
+
+$result = $link->query($y) or die(mysqli_error($link));
+$cnt = $result->num_rows;
+$i = 1;
+$rowCount = 7;
+while ($row = $result->fetch_assoc()) {
+    // Your existing code here
+	$qot=$row['quet_num'];
+	$krid=$row['id'];
+	$ac=$row['ac_det'];
+	$a="select store_code,ro_no,ro_date,falt_desc,tot_base,tot_ser,tot_gst,adv_amnt,adv_amnt1,adv_amnt2,gst_type,net,bal,invoice_date,invoice_no from add_knqot where quet_num='$qot'";
+	$result1=$link->query($a) or die(mysqli_error($link));
+	$row2=$result1->fetch_assoc();
+	$str_code=$row2['store_code'];
+	$tot_base=$row2['tot_base'];
+	$ds="select * from dpr where store_code='$str_code'";
+	$result2=$link->query($ds) or die(mysqli_error($link));
+	$row1=$result2->fetch_assoc();
+	$sheet->setCellValue('A'.$rowCount, mb_strtoupper($i,'UTF-8'));
+$sheet->setCellValue('B'.$rowCount, mb_strtoupper($qot,'UTF-8'));
+$sheet->setCellValue('C'.$rowCount, mb_strtoupper($row1['superwisor'],'UTF-8'));
+$sheet->setCellValue('D'.$rowCount, mb_strtoupper($row1['coordinator'],'UTF-8'));
+$sheet->setCellValue('E'.$rowCount, mb_strtoupper($row1['store_name'],'UTF-8'));
+$sheet->setCellValue('F'.$rowCount, mb_strtoupper($str_code,'UTF-8'));
+$sheet->setCellValue('G'.$rowCount, mb_strtoupper($row1['format_type'],'UTF-8'));
+$sheet->setCellValue('H'.$rowCount, mb_strtoupper($row2['ro_no'],'UTF-8'));
+$sheet->setCellValue('I'.$rowCount, mb_strtoupper(date('d.m.Y',strtotime($row2['ro_date'])),'UTF-8'));
+$sheet->setCellValue('J'.$rowCount, mb_strtoupper($row2['falt_desc'],'UTF-8'));
+$sheet->setCellValue('K'.$rowCount, mb_strtoupper($tot_base,'UTF-8'));
+$sheet->setCellValue('L'.$rowCount, mb_strtoupper($row2['tot_ser'],'UTF-8'));
+$sheet->setCellValue('M'.$rowCount, mb_strtoupper($row2['tot_gst'],'UTF-8'));
+$sheet->setCellValue('N'.$rowCount, mb_strtoupper($row2['net'],'UTF-8'));
+$sheet->setCellValue('O'.$rowCount, mb_strtoupper($row['req_amnt']+$row['gstamt'],'UTF-8'));
+$sheet->setCellValue('P'.$rowCount, mb_strtoupper($row2['bal'],'UTF-8'));
+$sheet->setCellValue('Q'.$rowCount, mb_strtoupper($row['gsttype'],'UTF-8'));
+$sheet->setCellValue('R'.$rowCount, mb_strtoupper($row['gstamt'],'UTF-8'));
+$sheet->setCellValue('S'.$rowCount, mb_strtoupper($row['remarks'],'UTF-8'));
+	$adamt="select sum(approve_amnt) as req_amnt from knrequest_amnt where quet_num='$qot'and  status='Amount Transferred' and   confirm='Yes' and date between '$fromdate' and '$todate' ";
+	$ads=$link->query($adamt) or die(mysqli_error($link));
+	$ads1=$ads->fetch_assoc();
+	$adsd=$ads1['req_amnt'];
+	$sheet->setCellValue('T'.$rowCount, mb_strtoupper($adsd,'UTF-8'));
+$sheet->setCellValue('U'.$rowCount, mb_strtoupper($ac,'UTF-8'));
+	$tyy="select sum(approve_amnt) as req_amnt from knrequest_amnt where quet_num='$qot'   and status='' and  confirm='Yes' and ac_det='$ac' and date between '$fromdate' and '$todate' ";
+	$result3=$link->query($tyy) or die(mysqli_error($link));
+	$row4=$result3->fetch_assoc();
+	$sheet->setCellValue('V'.$rowCount, mb_strtoupper($row4['req_amnt'],'UTF-8'));
+$sheet->setCellValue('W'.$rowCount, mb_strtoupper($row['date'],'UTF-8'));
+$sheet->setCellValue('X'.$rowCount, mb_strtoupper($row['user'],'UTF-8'));
+$sheet->setCellValue('Y'.$rowCount, mb_strtoupper($row2['invoice_date'],'UTF-8'));
+$sheet->setCellValue('Z'.$rowCount, mb_strtoupper($row2['invoice_no'],'UTF-8'));
+$sheet->setCellValue('AA'.$rowCount, mb_strtoupper($row2['tot_base']+$row2['tot_ser'],'UTF-8'));
+$sheet->setCellValue('AB'.$rowCount, mb_strtoupper($row2['tot_gst'],'UTF-8'));
+$sheet->setCellValue('AC'.$rowCount, mb_strtoupper($row2['net'],'UTF-8'));
+$sheet->setCellValue('Y'.$rowCount, mb_strtoupper($row2['invoice_date'], 'UTF-8'));
+$sheet->setCellValue('Z'.$rowCount, mb_strtoupper($row2['invoice_no'], 'UTF-8'));
+$sheet->setCellValue('AA'.$rowCount, mb_strtoupper($row2['tot_base'] + $row2['tot_ser'], 'UTF-8'));
+$sheet->setCellValue('AB'.$rowCount, mb_strtoupper($row2['tot_gst'], 'UTF-8'));
+$sheet->setCellValue('AC'.$rowCount, mb_strtoupper($row2['net'], 'UTF-8'));
+	$rowCount++;
+    $i++;
+}
+// Continue your code here...
+$cnt1 = 3;
+$tc = $rowCount + $cnt + $cnt1;
+//$objPHPExcel->getActiveSheet()->SetCellValue('K10', mb_strtoupper($tc,'UTF-8'));
+
+// Set values in the spreadsheet
+$sheet = $spreadsheet->getActiveSheet();
+$sheet->setCellValue('A' . $tc, 'SNo');
+$sheet->setCellValue('B' . $tc, 'Name');
+$sheet->setCellValue('C' . $tc, 'Account No');
+$sheet->setCellValue('D' . $tc, 'Bank');
+$sheet->setCellValue('E' . $tc, 'IFSC Code');
+$sheet->setCellValue('F' . $tc, 'Amount');
+
+if (($tsname == 'admin') || ($tsname == 'durgarao') || ($tsname == 'accounts') || ($tsname == 'sumanthpotluri')) {
+    $y2 = "select distinct ac_det from knrequest_amnt where confirm='Yes' and status='' ";
+} else {
+    $y2 = "select distinct ac_det from knrequest_amnt where user='$tsname' and confirm='Yes' and status='' and date between '$fromdate' and '$todate' ";
+}
+
+$result10 = $link->query($y2) or die(mysqli_error($link));
+$cnt2 = 1;
+$j = 1;
+$rowCount1 = $tc + $cnt2;
+
+while ($row10 = $result10->fetch_assoc()) {
+    $acd = $row10['ac_det'];
+    $yu = "select * from ac_det where name='$acd'";
+    $result11 = $link->query($yu) or die(mysqli_error($link));
+    $row11 = $result11->fetch_assoc();
+    $r12 = "select sum(approve_amnt) as amt from knrequest_amnt where ac_det='$acd' and confirm='Yes' and status='' and date between '$fromdate' and '$todate' ";
+    $result12 = $link->query($r12) or die(mysqli_error($link));
+    $row12 = $result12->fetch_assoc();
+    $dds = $row12['amt'];
+
+    $sheet->setCellValue('A' . $rowCount1, mb_strtoupper($j, 'UTF-8'));
+    $sheet->setCellValue('B' . $rowCount1, mb_strtoupper($acd, 'UTF-8'));
+    $sheet->setCellValue('C' . $rowCount1, mb_strtoupper($row11['ac_no'], 'UTF-8'));
+    $sheet->setCellValue('D' . $rowCount1, mb_strtoupper('', 'UTF-8'));
+    $sheet->setCellValue('E' . $rowCount1, mb_strtoupper($row11['ifsc'], 'UTF-8'));
+    $sheet->setCellValue('F' . $rowCount1, mb_strtoupper($dds, 'UTF-8'));
+
+    $j++;
+    $rowCount1++;
+}
+
+// ...
+
+// Save the spreadsheet
+$writer = new Xlsx($spreadsheet);
+$filename = 'knaprvamountlist.xlsx';
+
+header('Content-Type: application/vnd.ms-excel');
+header('Content-Disposition: attachment;filename="' . $filename . '"');
+header('Cache-Control: max-age=0');
+
+$writer->save('php://output');
+?>
